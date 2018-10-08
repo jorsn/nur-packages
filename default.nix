@@ -15,6 +15,6 @@
   overlays = import ./overlays; # nixpkgs overlays
 
   scdm = pkgs.callPackage ./pkgs/scdm { };
-  epson-workforce-635-nx625-series = pkgs.callPackage ../pkgs/printing/epson-workforce-635-nx625-series { };
+  epson-workforce-635-nx625-series = pkgs.callPackage ./pkgs/printing/epson-workforce-635-nx625-series { };
 }
 
