@@ -14,5 +14,6 @@
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
+  scdm = pkgs.callPackage ./pkgs/scdm { };
 }
 
