@@ -1,8 +1,25 @@
-{ lib }:
+{ pkgs }:
 
 let
-  callLibs = file: import file { inherit lib; };
-in {
+  inherit (pkgs) lib;
+  lib' = lib // libD;
+  callLibs = file: import file { lib = lib'; };
+
+  libD = { inherit jorsn; } // {
+    inherit (jorsn.attrsets) setAttrs;
+
+    inherit (jorsn.bool) is;
+    inherit (jorsn.functional) compose;
+
+    inherit (jorsn.filesystem)
+      isRegular isDir isHidden isSymlink isNixFile fileName dirName
+      dirPaths listDir fileType listNixDirTrees listNixDirTree listNixDirTree';
+
+    inherit (jorsn.lists) cons;
+
+    inherit (jorsn.strings) strip;
+  };
+
   jorsn = {
     attrsets = {
       setAttrs = names: b: lib.genAttrs names (a: b);
@@ -31,19 +48,5 @@ in {
         match = builtins.match "[[:space:]]*([^[:space:]](.*[^[:space:]])?)[[:space:]]*";
       in s: headSafe "" (fromNullOr [] match s);
     };
-
-  } // {
-    inherit (lib.jorsn.attrsets) setAttrs;
-
-    inherit (lib.jorsn.bool) is;
-    inherit (lib.jorsn.functional) compose;
-
-    inherit (lib.jorsn.filesystem)
-      isRegular isDir isHidden isSymlink isNixFile fileName dirName
-      dirPaths listDir fileType listNixDirTrees listNixDirTree listNixDirTree';
-
-    inherit (lib.jorsn.lists) cons;
-
-    inherit (lib.jorsn.strings) strip;
   };
-}
+in lib'

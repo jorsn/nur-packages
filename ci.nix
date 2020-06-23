@@ -16,7 +16,7 @@ with builtins;
 let
 
   isReserved = n: n == "lib" || n == "overlays" || n == "modules"
-    || "hmModules"; # see https://github.com/nix-community/NUR/issues/140
+    || n == "hmModules"; # see https://github.com/nix-community/NUR/issues/140
   isDerivation = p: isAttrs p && p ? type && p.type == "derivation";
   isBuildable = p: !(p.meta.broken or false) && p.meta.license.free or true;
   isCacheable = p: !(p.preferLocalBuild or false);
