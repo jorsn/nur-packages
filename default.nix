@@ -16,7 +16,6 @@ in {
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
-  scdm = callPackage ./pkgs/scdm {};
   zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
 }
 
