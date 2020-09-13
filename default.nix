@@ -16,6 +16,7 @@ let
   });
 
   haskell = pkgs: import ./pkgs/haskell { inherit (pkgs) lib haskell; };
+  ocaml-ng = import ./pkgs/ocaml { inherit (pkgs) lib ocaml-ng; };
   pkgs' = pkgs.extend (_: pkgs: { haskell = haskell pkgs; });
 
   inherit (pkgs) callPackage;
@@ -28,6 +29,9 @@ in {
 
   haskell = haskell pkgs;
   inherit (pkgs'.haskellPackages) bibi;
+
+  inherit ocaml-ng;
+  inherit (ocaml-ng.ocamlPackages_4_07) patoline;
 
   zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
 }
