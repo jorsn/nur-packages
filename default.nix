@@ -9,6 +9,9 @@
 { pkgs ? import <nixpkgs> {} }:
 
 let
+  haskell = pkgs: import ./pkgs/haskell { inherit (pkgs) lib haskell; };
+  pkgs' = pkgs.extend (_: pkgs: { haskell = haskell pkgs; });
+
   inherit (pkgs) callPackage;
 in {
   # The `lib`, `modules`, and `overlay` names are special
@@ -16,6 +19,9 @@ in {
   modules = import ./modules/nixos; # NixOS modules
   hmModules = import ./modules/home-manager;
   overlays = import ./overlays; # nixpkgs overlays
+
+  haskell = haskell pkgs;
+  inherit (pkgs'.haskellPackages) bibi;
 
   zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
 }
