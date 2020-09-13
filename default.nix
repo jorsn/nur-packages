@@ -6,9 +6,15 @@
 # commands such as:
 #     nix-build -A mypackage
 
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }@args:
 
 let
+  pkgs = args.pkgs.extend (self: super: {
+    config = (super.config or {}) // {
+      sources = (super.config.sources or {}) // import ./sources;
+    };
+  });
+
   haskell = pkgs: import ./pkgs/haskell { inherit (pkgs) lib haskell; };
   pkgs' = pkgs.extend (_: pkgs: { haskell = haskell pkgs; });
 
