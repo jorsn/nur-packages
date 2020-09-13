@@ -6,29 +6,29 @@
 # commands such as:
 #     nix-build -A mypackage
 
-{ pkgs ? import <nixpkgs> {} }@args:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
-  pkgs = args.pkgs.extend (self: super: {
+  pkgs' = pkgs.extend (self: super: {
     config = (super.config or {}) // {
       sources = (super.config.sources or {}) // import ./sources;
     };
   });
 
   haskell = pkgs: import ./pkgs/haskell { inherit (pkgs) lib haskell; };
-  ocaml-ng = import ./pkgs/ocaml { inherit (pkgs) lib ocaml-ng; };
-  pkgs' = pkgs.extend (_: pkgs: { haskell = haskell pkgs; });
+  ocaml-ng = import ./pkgs/ocaml { inherit (pkgs') lib ocaml-ng; };
+  pkgsh = pkgs'.extend (_: pkgs: { haskell = haskell pkgs; });
 
-  inherit (pkgs) callPackage;
+  inherit (pkgs') callPackage;
 in {
   # The `lib`, `modules`, and `overlay` names are special
-  lib = import ./lib { inherit pkgs; }; # functions
+  lib = import ./lib { pkgs = pkgs'; }; # functions
   modules = import ./modules/nixos; # NixOS modules
   hmModules = import ./modules/home-manager;
   overlays = import ./overlays; # nixpkgs overlays
 
-  haskell = haskell pkgs;
-  inherit (pkgs'.haskellPackages) bibi;
+  haskell = haskell pkgs';
+  inherit (pkgsh.haskellPackages) bibi;
 
   inherit ocaml-ng;
   inherit (ocaml-ng.ocamlPackages_4_07) patoline;
