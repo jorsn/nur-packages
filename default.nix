@@ -22,7 +22,7 @@ let
   inherit (pkgs') callPackage;
 in {
   # The `lib`, `modules`, and `overlay` names are special
-  lib = import ./lib { pkgs = pkgs'; }; # functions
+  lib = import ./lib { inherit (pkgs') lib; }; # functions
   modules = import ./modules/nixos; # NixOS modules
   hmModules = import ./modules/home-manager;
   overlays = import ./overlays; # nixpkgs overlays
