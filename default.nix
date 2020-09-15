@@ -33,5 +33,7 @@ in {
   inherit ocaml-ng;
   inherit (ocaml-ng.ocamlPackages_4_07) patoline;
 
+  shellFileBin =  callPackage ./pkgs/build-support/shellFileBin {};
+
   zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
 }
