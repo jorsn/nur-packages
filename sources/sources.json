@@ -1,6 +1,7 @@
 {
     "patoline": {
         "branch": "master",
+        "builtin": false,
         "description": "Patoline typesetting system",
         "homepage": "http://patoline.org",
         "owner": "patoline",
