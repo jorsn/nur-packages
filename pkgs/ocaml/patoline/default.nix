@@ -42,6 +42,6 @@ buildDunePackage rec {
     description = "Patoline typesetting system";
     license = lib.licenses.gpl2;
     maintainers = [ ];
-    inherit (src.meta) homepage;
+    homepage = "https://github.com/patoline/patoline";
   };
 }
