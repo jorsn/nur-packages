@@ -9,31 +9,34 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  pkgs' = pkgs.extend (self: super: {
-    config = (super.config or {}) // {
-      sources = (super.config.sources or {}) // import ./sources;
+  inherit (lock.nodes.flake-compat.locked) rev narHash;
+
+  lock' = builtins.fromJSON (builtins.readFile ./flake.lock);
+  lock  = lock' // {
+    nodes = lock'.nodes // {
+      # use provided nixpkgs ('pkgs')
+      nixpkgs.original = { type = "path"; inherit (pkgs) path; };
     };
-  });
+  };
+  getFlake' = src: (import
+    (fetchTarball {
+      url = "https://github.com/edolstra/flake-compat/archive/${rev}.tar.gz";
+      sha256 = narHash;
+    })
+    {
+      inherit src;
+    }).defaultNix;
 
-  haskell = pkgs: import ./pkgs/haskell { inherit (pkgs) lib haskell; };
-  ocaml-ng = import ./pkgs/ocaml { inherit (pkgs') lib ocaml-ng; };
-  pkgsh = pkgs'.extend (_: pkgs: { haskell = haskell pkgs; });
+  flake = (builtins.getFlake or getFlake') (toString ./.);
 
-  inherit (pkgs') callPackage;
-in {
-  # The `lib`, `modules`, and `overlay` names are special
-  lib = import ./lib { inherit (pkgs') lib; }; # functions
-  modules = import ./modules/nixos; # NixOS modules
-  hmModules = import ./modules/home-manager;
-  overlays = import ./overlays; # nixpkgs overlays
-
-  haskell = haskell pkgs';
-  inherit (pkgsh.haskellPackages) bibi;
-
-  inherit ocaml-ng;
-  inherit (ocaml-ng.ocamlPackages_4_07) patoline;
-
-  shellFileBin =  callPackage ./pkgs/build-support/shellFileBin {};
-
-  zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
+  pkgs' = pkgs.extend flake.overlay;
+  nurPkgs = flake.overlay pkgs' pkgs;
+in
+nurPkgs // {
+  inherit (flake)
+    lib
+    overlays
+    modules
+    hmModules
+    ;
 }
