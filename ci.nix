@@ -13,8 +13,6 @@
 
 with builtins;
 let
-  isReserved = n: n == "lib" || n == "overlays" || n == "modules"
-    || n == "hmModules"; # see https://github.com/nix-community/NUR/issues/140
   isDerivation = p: isAttrs p && p ? type && p.type == "derivation";
   isBuildable = p: !(p.meta.broken or false) && p.meta.license.free or true;
   isCacheable = p: !(p.preferLocalBuild or false);
@@ -35,14 +33,9 @@ let
 
   outputsOf = p: map (o: p.${o}) p.outputs;
 
-  nurAttrs = import ./default.nix { inherit pkgs; };
-
-  nurPkgs =
-    flattenPkgs
-      (listToAttrs
-        (map (n: nameValuePair n nurAttrs.${n})
-          (filter (n: !isReserved n)
-            (attrNames nurAttrs))));
+  overlay = import ./overlay.nix;
+  pkgs' = pkgs.extend overlay;
+  nurPkgs = flattenPkgs (overlay pkgs' pkgs);
 
 in
 rec {
