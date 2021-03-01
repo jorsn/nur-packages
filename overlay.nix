@@ -2,15 +2,13 @@
 # case where you don't want to add the whole NUR namespace to your
 # configuration.
 
-self: super:
-let
-  isReserved = n: n == "lib" || n == "overlays" || n == "modules"
-    || n == "hmModules"; # see https://github.com/nix-community/NUR/issues/140
-  nameValuePair = n: v: { name = n; value = v; };
-  nurAttrs = import ./default.nix { pkgs = super; };
+final: prev:
 
+let
+  getFlake' = src: import ./flake-compat.nix src {
+    nixpkgs = { type = "path"; inherit (prev) path; };
+  }.defaultNix;
+
+  flake = (builtins.getFlake or getFlake') (toString ./.);
 in
-builtins.listToAttrs
-  (map (n: nameValuePair n nurAttrs.${n})
-    (builtins.filter (n: !isReserved n)
-      (builtins.attrNames nurAttrs)))
+  flake.overlay final prev

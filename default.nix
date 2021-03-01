@@ -9,23 +9,9 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  inherit (lock.nodes.flake-compat.locked) rev narHash;
-
-  lock' = builtins.fromJSON (builtins.readFile ./flake.lock);
-  lock  = lock' // {
-    nodes = lock'.nodes // {
-      # use provided nixpkgs ('pkgs')
-      nixpkgs.original = { type = "path"; inherit (pkgs) path; };
-    };
-  };
-  getFlake' = src: (import
-    (fetchTarball {
-      url = "https://github.com/edolstra/flake-compat/archive/${rev}.tar.gz";
-      sha256 = narHash;
-    })
-    {
-      inherit src;
-    }).defaultNix;
+  getFlake' = src: import ./flake-compat.nix src {
+    nixpkgs = { type = "path"; inherit (pkgs) path; };
+  }.defaultNix;
 
   flake = (builtins.getFlake or getFlake') (toString ./.);
 
