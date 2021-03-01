@@ -7,9 +7,7 @@
   };
   inputs.sources.url = "path:./sources";
 
-  outputs = inputs@{ self, nixpkgs, utils, flake-compat, sources }: let
-    lib = nixpkgs.lib.recursiveUpdate nixpkgs.lib self.lib;
-  in {
+  outputs = inputs@{ self, nixpkgs, utils, flake-compat, sources }: {
     # The `lib`, `modules`, and `overlays` names are special
     lib = import ./lib { inherit (nixpkgs) lib; }; # functions
     modules = import ./modules/nixos; # NixOS modules
@@ -17,9 +15,10 @@
     overlays = import ./overlays; # nixpkgs overlays
 
     overlay = final: prev: let
-      inherit (final) callPackage;
+      inherit (final) callPackage lib;
     in
     {
+      lib = prev.lib.recursiveUpdate prev.lib (import ./lib { inherit (prev) lib; });
       config = lib.recursiveUpdate prev.config { sources = sources.inputs; };
 
       haskell = import ./pkgs/haskell { inherit lib; inherit (prev) haskell; };
@@ -32,7 +31,9 @@
 
       zsh-prompt-gentoo = callPackage ./pkgs/zsh-prompt-gentoo {};
     };
-  } // utils.lib.eachDefaultSystem (system: let
+  }
+  // utils.lib.eachDefaultSystem (system: let
+    lib = nixpkgs.lib.recursiveUpdate nixpkgs.lib self.lib;
     pkgs = import nixpkgs {
       inherit system;
       overlays = [ self.overlay ] ++ lib.attrValues self.overlays;
